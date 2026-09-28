@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="A Bluetooth Classic BR/EDR serial demo and college project explainer.">
+    <title>
+      Classic Bluetooth Lab | BR/EDR
+    </title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header class="top">
+      <div class="wrap nav">
+        <div class="brand">
+          ᛒ &nbsp; CLASSIC BT LAB
+        </div>
+        <nav class="links">
+          <a href="#connect">
+            Live demo
+          </a>
+          <a href="#how">
+            How it works
+          </a>
+          <a href="#uses">
+            Applications
+          </a>
+          <a href="#code">
+            Code
+          </a>
+        </nav>
+        <span class="badge">
+          BR/EDR · no BLE
+        </span>
+      </div>
+    </header>
+    <main>
+      <section class="hero">
+        <div class="wrap hero-grid">
+          <div>
+            <div class="eyebrow">
+              College project · Bluetooth Classic
+            </div>
+            <h1>
+              Connect.
+              <br>
+              <span>
+                Send data.
+              </span>
+            </h1>
+            <p>
+              A working browser-to-device demo using Classic Bluetooth RFCOMM/SPP. Pair a serial-capable device first, then connect from desktop Chrome and exchange text.
+            </p>
+            <p style="font-size:.88rem;color:#a9c0cd">
+              This website does not replace Android's Bluetooth settings or control every type of Bluetooth device.
+            </p>
+          </div>
+          <div class="orb" aria-hidden="true">
+            <div class="chip">
+              <span>
+                ᛒ
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="wrap">
+        <div class="stats">
+          <div class="stat">
+            <b>
+              Classic
+            </b>
+            <span>
+              BR/EDR radio
+            </span>
+          </div>
+          <div class="stat">
+            <b>
+              RFCOMM
+            </b>
+            <span>
+              Serial data channel
+            </span>
+          </div>
+          <div class="stat">
+            <b>
+              SPP
+            </b>
+            <span>
+              Serial Port Profile
+            </span>
+          </div>
+          <div class="stat">
+            <b>
+              Chrome desktop
+            </b>
+            <span>
+              Web Serial API
+            </span>
+          </div>
+        </div>
+      </div>
+      <section class="band" id="connect">
+        <div class="wrap">
+          <div class="head">
+            <div class="kicker">
+              01 · Live connection
+            </div>
+            <h2>
+              Connect to a paired SPP device
+            </h2>
+            <p>
+              The browser opens a real serial stream over Bluetooth Classic. Chrome asks you to choose an eligible device.
+            </p>
+          </div>
+          <div class="grid">
+            <article class="panel">
+              <h3>
+                Bluetooth serial terminal
+              </h3>
+              <p class="muted">
+                Connect to a Bluetooth serial adapter, compatible printer, RFID/GPS device, or Android device running an RFCOMM/SPP server app.
+              </p>
+              <div id="support" class="status">
+                Checking browser support…
+              </div>
+              <div class="controls">
+                <button id="connectBtn" class="btn primary">
+                  Connect Bluetooth device
+                </button>
+                <button id="disconnectBtn" class="btn secondary" disabled>
+                  Disconnect
+                </button>
+                <label for="baud" class="muted" style="font-size:.84rem">
+                  Baud
+                </label>
+                <select id="baud" class="field">
+                  <option>
+                    9600
+                  </option>
+                  <option>
+                    19200
+                  </option>
+                  <option>
+                    38400
+                  </option>
+                  <option>
+                    57600
+                  </option>
+                  <option>
+                    115200
+                  </option>
+                </select>
+              </div>
+              <div id="connectionStatus" class="status" aria-live="polite">
+                Not connected. Pair your device in system settings first.
+              </div>
+              <div id="terminal" class="terminal" aria-live="polite">
+                <span class="sys">
+                  Terminal ready. Incoming text appears here.
+                </span>
+              </div>
+              <div class="send">
+                <input id="message" class="field" placeholder="Type a message (sends a newline)" autocomplete="off">
+                <button id="sendBtn" class="btn primary" disabled>
+                  Send
+                </button>
+              </div>
+            </article>
+            <aside class="panel">
+              <h3>
+                How to connect
+              </h3>
+              <ol class="muted" style="padding-left:20px">
+                <li>
+                  Use desktop Google Chrome 117 or later.
+                </li>
+                <li>
+                  Pair your Bluetooth serial device in Windows Bluetooth settings.
+                </li>
+                <li>
+                  For Android, the phone needs an app that listens on SPP/RFCOMM; pair the phone to this computer.
+                </li>
+                <li>
+                  Click
+                  <b>
+                    Connect Bluetooth device
+                  </b>
+                  and choose it in Chrome.
+                </li>
+                <li>
+                  Send a line. The other side must use newline-delimited text.
+                </li>
+              </ol>
+              <div class="notice">
+                <b>
+                  Important limit:
+                </b>
+                This page connects to Bluetooth serial (SPP/RFCOMM). It cannot pair with or control arbitrary phones, headphones, keyboards, or car audio. The device must provide a compatible serial service.
+              </div>
+              <p class="muted" style="font-size:.84rem">
+                Serve from
+                <code>
+                  localhost
+                </code>
+                or HTTPS. A file preview or mobile browser may not expose Web Serial.
+              </p>
+            </aside>
+          </div>
+        </div>
+      </section>
+      <section id="how">
+        <div class="wrap">
+          <div class="head">
+            <div class="kicker">
+              02 · How the code works
+            </div>
+            <h2>
+              From click to Bluetooth data
+            </h2>
+            <p>
+              Web Serial grants access to the selected port. JavaScript opens it, decodes bytes and writes text.
+            </p>
+          </div>
+          <div class="steps">
+            <article class="step">
+              <b>
+                Choose a device
+              </b>
+              <p>
+                <code>
+                  requestPort()
+                </code>
+                opens Chrome's chooser, filtered to SPP.
+              </p>
+            </article>
+            <article class="step">
+              <b>
+                Open the link
+              </b>
+              <p>
+                <code>
+                  port.open()
+                </code>
+                opens the RFCOMM serial stream.
+              </p>
+            </article>
+            <article class="step">
+              <b>
+                Read bytes
+              </b>
+              <p>
+                A reader decodes UTF-8 and displays complete lines.
+              </p>
+            </article>
+            <article class="step">
+              <b>
+                Write text
+              </b>
+              <p>
+                A writer encodes the message and appends newline.
+              </p>
+            </article>
+            <article class="step">
+              <b>
+                OS pairing
+              </b>
+              <p>
+                Windows handles radio pairing and link security.
+              </p>
+            </article>
+            <article class="step">
+              <b>
+                Device protocol
+              </b>
+              <p>
+                The other device must agree on SPP and message format.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section class="band" id="uses">
+        <div class="wrap">
+          <div class="head">
+            <div class="kicker">
+              03 · Applications
+            </div>
+            <h2>
+              Where Bluetooth Classic is used
+            </h2>
+            <p>
+              This website demonstrates serial data; these other profiles show the wider range of classic Bluetooth uses.
+            </p>
+          </div>
+          <div class="apps">
+            <article class="app">
+              <div class="icon">
+                🧾
+              </div>
+              <h3>
+                Receipt printers
+              </h3>
+              <span class="tag">
+                SPP / RFCOMM
+              </span>
+              <p>
+                Point-of-sale apps send print commands and transaction text.
+              </p>
+            </article>
+            <article class="app">
+              <div class="icon">
+                📡
+              </div>
+              <h3>
+                GPS and RFID
+              </h3>
+              <span class="tag">
+                SPP / RFCOMM
+              </span>
+              <p>
+                Field devices stream location readings or tag data to a host.
+              </p>
+            </article>
+            <article class="app">
+              <div class="icon">
+                🎧
+              </div>
+              <h3>
+                Music audio
+              </h3>
+              <span class="tag">
+                A2DP
+              </span>
+              <p>
+                Phones stream media to headphones and speakers; this page does not implement audio.
+              </p>
+            </article>
+            <article class="app">
+              <div class="icon">
+                🚘
+              </div>
+              <h3>
+                Hands-free calls
+              </h3>
+              <span class="tag">
+                HFP
+              </span>
+              <p>
+                Phones share call controls and voice with vehicle systems and headsets.
+              </p>
+            </article>
+            <article class="app">
+              <div class="icon">
+                ⌨️
+              </div>
+              <h3>
+                Keyboards & controllers
+              </h3>
+              <span class="tag">
+                HID
+              </span>
+              <p>
+                Accessories send standardized input reports to a computer or tablet.
+              </p>
+            </article>
+            <article class="app">
+              <div class="icon">
+                📱
+              </div>
+              <h3>
+                Android data link
+              </h3>
+              <span class="tag">
+                SPP / RFCOMM
+              </span>
+              <p>
+                An Android app can expose an RFCOMM server for this desktop page to exchange messages with.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section id="code">
+        <div class="wrap">
+          <div class="head">
+            <div class="kicker">
+              04 · Code explanation
+            </div>
+            <h2>
+              The connection code
+            </h2>
+            <p>
+              The browser picker only opens after the user presses the connect button.
+            </p>
+          </div>
+          <pre class="code">
+            <code>
+              // Bluetooth Serial Port Profile service UUID
+const SPP_UUID = "00001101-0000-1000-8000-00805f9b34fb";
+
+// The user gesture opens the browser device chooser
+const port = await navigator.serial.requestPort({
+  filters: [{ bluetoothServiceClassId: SPP_UUID }]
+});
+
+// Open the RFCOMM serial data stream
+await port.open({ baudRate: 9600 });
+
+// Send a UTF-8 line to the device
+const writer = port.writable.getWriter();
+await writer.write(new TextEncoder().encode("Hello\\n"));
+writer.releaseLock();
+            </code>
+          </pre>
+          <p class="muted">
+            The operating system and browser handle the radio and pairing. The website handles the selected serial port and the bytes sent through it.
+          </p>
+        </div>
+      </section>
+      <section class="band">
+        <div class="wrap">
+          <div class="head">
+            <div class="kicker">
+              Project boundary
+            </div>
+            <h2>
+              What this website can and cannot do
+            </h2>
+          </div>
+          <div class="apps">
+            <article class="app">
+              <h3 style="color:#168058">
+                Can connect
+              </h3>
+              <p>
+                Paired Classic devices exposing SPP/RFCOMM: serial adapters, compatible printers, and devices running an SPP server.
+              </p>
+            </article>
+            <article class="app">
+              <h3 style="color:#a74444">
+                Cannot connect generically
+              </h3>
+              <p>
+                Bluetooth audio, hands-free calls, generic HID keyboards, or phones without a serial service.
+              </p>
+            </article>
+            <article class="app">
+              <h3>
+                Requirements
+              </h3>
+              <p>
+                Desktop Chrome 117+, user permission, device pairing, and a secure origin such as localhost or HTTPS.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="wrap">
+          <div class="head">
+            <div class="kicker">
+              Sources
+            </div>
+            <h2>
+              Official references
+            </h2>
+          </div>
+          <ul class="refs">
+            <li>
+              Chrome Developers,
+              <a href="https://developer.chrome.com/blog/serial-over-bluetooth">
+                Serial over Bluetooth on the web
+              </a>
+              .
+            </li>
+            <li>
+              Chrome Developers,
+              <a href="https://developer.chrome.com/blog/bluetooth-rfcomm-updates-web-serial">
+                Bluetooth RFCOMM updates in Web Serial
+              </a>
+              .
+            </li>
+            <li>
+              Android Developers,
+              <a href="https://developer.android.com/develop/connectivity/bluetooth">
+                Bluetooth overview
+              </a>
+              .
+            </li>
+          </ul>
+        </div>
+      </section>
+    </main>
+    <footer class="footer">
+      <div class="wrap">
+        <span>
+          Classic Bluetooth Lab · College project
+        </span>
+        <span>
+          BR/EDR · RFCOMM/SPP · BLE excluded
+        </span>
+      </div>
+    </footer>
+    <script src="script.js" defer>
+    </script>
+  </body>
+</html>
